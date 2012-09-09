@@ -50,6 +50,7 @@ studya$LOSt <- studya$LOS
 studya$LOSt[(studya$LOSt<trim[1])|(studya$LOSt>trim[2])] <- NA
 
 #Descriptive statistics by group
+################################
 library(psych)
 library(ggplot2)
 library(plyr)
@@ -57,12 +58,13 @@ library(epitools)
 library(survival)  # For conditional logistic regression
 library(epicalc)   # for idr.display
 
+attach(studya)
 str(studya)
 summary(studya)
 describe.by(studya, group=studya$studygroup)
 
 # LOS
-x=studya$LOS
+x=LOS
 ggplot(studya, aes(x=LOS, fill=studygroup))+
   geom_density(alpha=0.5)+xlim(0,60)
 
@@ -71,8 +73,8 @@ ggplot(studya, aes(x=LOS, fill=studygroup))+
   facet_grid(studygroup~.)+
   xlim(0,60)
 
-t.test(x~studya$studygroup)
-wilcox.test(studya$LOS~studya$studygroup)
+t.test(x~studygroup)
+wilcox.test(LOS~studygroup)
 summary(x)
 #m1<-glm(IsCase~x, family="poisson", data=studya);summary(m1)
 #idr.display(m1,decimal=4)
@@ -83,23 +85,23 @@ summary(m1);exp(coef(m1));exp(confint(m1))
 # Admit Age - not significant
 ggplot(studya, aes(x=AdmitAge, fill=studygroup))+
   geom_density(alpha=0.5)+xlim(0,300)
-wilcox.test(studya$AdmitAge~studya$studygroup)
+wilcox.test(AdmitAge~studygroup)
 
 # Admit DOW - not significant
-x <- studya$AdmitDOWf
-epitab(xtabs(~x+studya$studygroup), correction=T, rev="c")
+x <- AdmitDOWf
+epitab(xtabs(~x+studygroup), correction=T, rev="c")
 
 # Event DOW - not significant
-x <- studya$eDOWf
-mytable <- table(x, studya$studygroup)
+x <- eDOWf
+mytable <- table(x, studygroup)
 mytable
 prop.table(mytable,2) # Column percentages
 summary(mytable)
-epitab(xtabs(~x+studya$studygroup), correction=T, rev="c")
+epitab(xtabs(~x+studygroup), correction=T, rev="c")
 
 # DC DOW - more control dc on Monday, maybe
-x <- studya$DCDOWf
-mytable <- table(x, studya$studygroup)
+x <- DCDOWf
+mytable <- table(x, studygroup)
 mytable
 prop.table(mytable,2) # Column percentages
 summary(mytable)
@@ -108,17 +110,17 @@ m1<-clogit(IsCase~x+strata(ccstudynum), data=studya, method="exact")
 summary(m1);exp(coef(m1));exp(confint(m1))
 mydf <- count(studya, vars=c('studygroup','DCDOWf'))
 mydf <- ddply(mydf, .(studygroup), transform, p = freq/sum(freq))
-ggplot(studya, aes(DCDOWf, fill=studygroup))+
-  geom_bar(position="dodge")
+#ggplot(studya, aes(DCDOWf, fill=studygroup))+
+#  geom_bar(position="dodge")
 ggplot(mydf, aes(DCDOWf, p, fill=studygroup))+
   geom_bar(stat="identity", position="dodge")
-ggplot(mydf, aes(DCDOWf, p))+
-  geom_bar(stat="identity")+facet_grid(~studygroup)
+#ggplot(mydf, aes(DCDOWf, p))+
+#  geom_bar(stat="identity")+facet_grid(~studygroup)
 
 
-# dispo - 
-x <- studya$dispo
-mytable <- table(x, studya$studygroup)
+# dispo - more deaths in case group
+x <- dispo
+mytable <- table(x, studygroup)
 mytable
 prop.table(mytable,2) # Column percentages
 summary(mytable)
@@ -135,8 +137,8 @@ ggplot(mydf, aes(dispo, p))+
   geom_bar(stat="identity")+facet_grid(~studygroup)
 
 # gender - NS
-x <- studya$gender
-mytable <- table(studya$gender, studya$studygroup)
+x <- gender
+mytable <- table(gender, studygroup)
 mytable
 prop.table(mytable,2) # Column percentages
 summary(mytable)
@@ -144,25 +146,27 @@ m1<-clogit(IsCase~x+strata(ccstudynum), data=studya, method="exact")
 summary(m1);exp(coef(m1));exp(confint(m1))
 
 # race - NS
-mytable <- table(studya$race, studya$studygroup)
+mytable <- table(race, studygroup)
 mytable
 prop.table(mytable,2) # Column percentages
 summary(mytable)
 
 # HourGroup - cases higher 12,16, and 20
-x <- studya$HourGroup
-mytable <- table(x, studya$studygroup)
+x <- HourGroup
+mytable <- table(x, studygroup)
 mytable
 prop.table(mytable,2) # Column percentages
 summary(mytable)
 epitab(xtabs(~x+studya$studygroup), correction=T, rev="c")
 m1<-clogit(IsCase~x+strata(ccstudynum), data=studya, method="exact")
 summary(m1);exp(coef(m1));exp(confint(m1))
-mydf <- count(studya, vars=c('studygroup','dispo'))
+mydf <- count(studya, vars=c('studygroup','HourGroup'))
 mydf <- ddply(mydf, .(studygroup), transform, p = freq/sum(freq))
-ggplot(studya, aes(dispo, fill=studygroup))+
-  geom_bar(position="dodge")
-ggplot(mydf, aes(dispo, p, fill=studygroup))+
+#ggplot(studya, aes(HourGroup, fill=studygroup))+
+#  geom_bar(position="dodge")
+ggplot(mydf, aes(HourGroup, p, fill=studygroup))+
   geom_bar(stat="identity", position="dodge")
-ggplot(mydf, aes(dispo, p))+
+ggplot(mydf, aes(HourGroup, p))+
   geom_bar(stat="identity")+facet_grid(~studygroup)
+
+# OK, done with descriptive statistics
