@@ -1,6 +1,7 @@
 # Pull data from mysql server to do some basic
 # descriptive statistics on cases vs controls
-# dataset is studya
+# dataset is 
+
 library(RODBC)
 odbcch <- odbcConnect("rindex2012")
 # sqlTables(odbcch)
